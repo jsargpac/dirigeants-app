@@ -19,7 +19,7 @@ node app.js
 ```
 
 Ou bien :
-run `sudo npm install -g nodemon` et `nodemon app.js` au lieu de `node app.js`
+run `npm install -g nodemon` et `nodemon app.js` au lieu de `node app.js`
 
 MongoDB :
 "C:\Program Files\MongoDB\Server\3.4\bin\mongod.exe"
