@@ -22,7 +22,9 @@ Ou bien :
 run `npm install -g nodemon` et `nodemon app.js` au lieu de `node app.js`
 
 MongoDB :
+```bash
 "C:\Program Files\MongoDB\Server\3.4\bin\mongod.exe"
+```
 
 License
 -------
