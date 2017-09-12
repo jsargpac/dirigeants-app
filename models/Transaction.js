@@ -14,6 +14,6 @@ const transactionSchema = new mongoose.Schema({
   currency: String
 }, { timestamps: true });
 
-const User = mongoose.model('User', transactionSchema);
+const Transaction = mongoose.model('Transaction', transactionSchema);
 
-module.exports = User;
+module.exports = Transaction;

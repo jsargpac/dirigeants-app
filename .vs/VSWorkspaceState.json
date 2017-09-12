@@ -4,8 +4,13 @@
     "\\config",
     "\\controllers",
     "\\models",
-    "\\public"
+    "\\public",
+    "\\test",
+    "\\uploads",
+    "\\views",
+    "\\views\\account",
+    "\\views\\partials"
   ],
-  "SelectedNode": "\\public\\js",
+  "SelectedNode": "\\controllers\\user.js",
   "PreviewInSolutionExplorer": false
 }
