@@ -24,10 +24,12 @@ exports.postTransactions = (req, res, next) => {
     //var params = "isin=FR0004152882"
     http.open("POST", url, true);
 
-    //http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     //http.setRequestHeader("Content-type", "multipart/form-data");
     //http.setRequestHeader("Content-length", params.length);
     //http.setRequestHeader("Connection", "close");
+    http.setRequestHeader("Access-Control-Allow-Origin", "*");
+    http.setRequestHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); 
 
     http.onreadystatechange = function () {
         if (http.readyState == 4 && http.status == 200) {
