@@ -1,4 +1,6 @@
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const httpRequest = require('https');
+var querystring = require('querystring')
 
 /**
  * GET /transactions
@@ -19,25 +21,79 @@ exports.getTransactions = (req, res) => {
 exports.postTransactions = (req, res, next) => {
 
     var http = new XMLHttpRequest();
-    var url = "https://lestransactions.fr/api";
-    var params = "date=2017-06-30";
-    //var params = "isin=FR0004152882"
-    http.open("POST", url, true);
+    //var url = "https://lestransactions.fr/api";
+    //var params = "date=2017-06-30";
+    ////var params = "isin=FR0004152882"
+    //http.open("POST", url, true);
 
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    //http.setRequestHeader("Content-type", "multipart/form-data");
-    //http.setRequestHeader("Content-length", params.length);
-    //http.setRequestHeader("Connection", "close");
-    http.setRequestHeader("Access-Control-Allow-Origin", "*");
-    http.setRequestHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); 
+    //http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    ////http.setRequestHeader("Content-type", "multipart/form-data");
+    ////http.setRequestHeader("Content-length", params.length);
+    ////http.setRequestHeader("Connection", "close");
+    //http.setRequestHeader("Access-Control-Allow-Origin", "*");
+    //http.setRequestHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); 
 
-    http.onreadystatechange = function () {
-        if (http.readyState == 4 && http.status == 200) {
-            var response = JSON.parse(http.responseText);
-            console.log(response);
-        }
-    }
-    http.send(params);
+    //http.onreadystatechange = function () {
+    //    if (http.readyState == 4 && http.status == 200) {
+    //        var response = JSON.parse(http.responseText);
+    //        console.log(response);
+    //    }
+    //}
+    //http.send(params);
+
+    //var postData = 'date=2017-06-30'
+    //var postBody = querystring.stringify(postData);
+
+    //var options = {
+    //    host: 'lestransactions.fr',
+    //    port: 443,
+    //    path: '/api',
+    //    headers: {
+    //        'Content-Type': 'application/x-www-form-urlencoded',
+    //        'Content-Length': postBody.length
+    //    },
+    //    //body: {"date":"2017-06-30"},
+    //    method: 'POST'
+    //};
+
+    //var req = httpRequest.request(options, function (res) {
+    //    console.log('STATUS: ' + res.statusCode);
+    //    console.log('HEADERS: ' + JSON.stringify(res.headers));
+    //    res.setEncoding('utf8');
+    //    res.on('data', function (chunk) {
+    //        console.log('BODY: ' + chunk);
+    //    });
+    //});
+
+    //req.on('error', function (e) {
+    //    console.log('problem with request: ' + e.message);
+    //});
+
+    //// write data to request body
+    //req.write(postBody);
+    //req.end();
+
+
+    postBody = "date=2017-06-30";
+
+    options = {
+        host: 'lestransactions.fr',
+        path: '/api',
+        port: 443,
+        method: 'POST',
+       //your options which have to include the two headers
+       headers : {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': postBody.length
+            }
+    };
+
+    var https = require('https')
+    var request = https.request(options, function (response) {
+        // Handle the response
+    });
+    request.write(postBody);
+    request.end();
 
     //AlphaVantage API Key: 974UTD95QA2DV3Y5
     function requestAlphaVantageData(symbol) {
