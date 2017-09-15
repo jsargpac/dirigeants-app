@@ -56,6 +56,10 @@ mongoose.connection.on('error', (err) => {
   process.exit();
 });
 
+//mongoose.connection.once('connected', () => {
+//    mongoose.connection.db.dropDatabase();
+//});
+
 /**
  * Express configuration.
  */

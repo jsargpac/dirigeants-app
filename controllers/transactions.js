@@ -1,6 +1,9 @@
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const httpRequest = require('https');
-var querystring = require('querystring')
+var querystring = require('querystring');
+var mongoose = require('mongoose');
+var fs = require('fs');
+var util = require('util');
 
 /**
  * GET /transactions
@@ -74,26 +77,77 @@ exports.postTransactions = (req, res, next) => {
     //req.end();
 
 
-    postBody = "date=2017-06-30";
+    //postBody = "date=2017-06-30";
 
-    options = {
-        host: 'lestransactions.fr',
-        path: '/api',
-        port: 443,
-        method: 'POST',
-       //your options which have to include the two headers
-       headers : {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Content-Length': postBody.length
+    //options = {
+    //    host: 'lestransactions.fr',
+    //    path: '/api',
+    //    port: 443,
+    //    method: 'POST',
+    //   //your options which have to include the two headers
+    //   headers : {
+    //            'Content-Type': 'application/x-www-form-urlencoded',
+    //            'Content-Length': postBody.length
+    //        }
+    //};
+
+    //var https = require('https')
+    //var request = https.request(options, function (response) {
+    //    // Handle the response
+    //});
+    //request.write(postBody);
+    //request.end();
+
+    importFromCSV();
+
+    function importFromCSV() {
+        var lineList = fs.readFileSync('../data.csv').toString().split('\n');
+        lineList.shift(); // Shift the headings off the list of records.
+
+        var schemaKeyList = ['isin', 'company', 'manager', 'date', 'nature', 'instrument',
+            'price', 'quantity', 'total', 'capital_share', 'currency'];
+
+        function queryAllEntries() {
+            transaction.aggregate(
+                {
+                    $group: {
+                        _id: '$RepName', oppArray: {
+                            $push: {
+                                isin: 'isin'
+                            }
+                        }
+                    }
+                }, function (err, qDocList) {
+                    console.log(util.inspect(qDocList, false, 10));
+                    process.exit(0);
+                });
+        }
+
+        // Recursively go through list adding documents.
+        // (This will overload the stack when lots of entries
+        // are inserted.  In practice I make heavy use the NodeJS 
+        // "async" module to avoid such situations.)
+        function createDocRecurse(err) {
+            if (err) {
+                console.log(err);
+                process.exit(1);
             }
-    };
+            if (lineList.length) {
+                var line = lineList.shift();
+                var doc = new transaction();
+                doc['id'] = mongoose.Types.ObjectId();
+                line.split(';').forEach(function (entry, i) {
+                    doc[schemaKeyList[i]] = entry;
+                });
+                doc.save(createDocRecurse);
+            } else {
+                // After the last entry query to show the result.
+                //queryAllEntries();
+            }
+        }
 
-    var https = require('https')
-    var request = https.request(options, function (response) {
-        // Handle the response
-    });
-    request.write(postBody);
-    request.end();
+        createDocRecurse(null);
+    }
 
     //AlphaVantage API Key: 974UTD95QA2DV3Y5
     function requestAlphaVantageData(symbol) {

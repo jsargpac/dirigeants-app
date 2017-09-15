@@ -11,6 +11,6 @@
     "\\views\\account",
     "\\views\\partials"
   ],
-  "SelectedNode": "\\controllers\\user.js",
+  "SelectedNode": "\\controllers\\transactions.js",
   "PreviewInSolutionExplorer": false
 }
