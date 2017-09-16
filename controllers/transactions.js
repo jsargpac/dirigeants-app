@@ -10,11 +10,15 @@ var util = require('util');
  * Liste des transactions
  */
 const transaction = require('../models/Transaction.js');
+const isin = require('../models/Isin.js');
 
 exports.getTransactions = (req, res) => {
-    transaction.find((err, docs) => {
-      res.render('transactions', { transactions: docs });
-  });
+    //transaction.find((err, docs) => {
+    //    res.render('transactions', { transactions: docs });
+    //});
+    isin.find((err, docs) => {
+        res.render('transactions', { isins: docs });
+    });
 };
 
 /**
@@ -98,7 +102,38 @@ exports.postTransactions = (req, res, next) => {
     //request.write(postBody);
     //request.end();
 
-    importFromCSV();
+    //importISIN();
+    //importFromCSV();
+
+    getCodeFromISIN('FR0010313486', function (err, code) {
+        requestQuandlData(code, "2017-09-10", "2017-09-12");
+    });
+
+    function importISIN() {
+        var lineList = fs.readFileSync('../Euronext_Equities_EU.csv').toString().split('\n');
+        lineList.shift();
+
+        var schemaKeyList = ['isin', 'code'];
+        
+        function createDocRecurse(err) {
+            if (err) {
+                console.log(err);
+                process.exit(1);
+            }
+            if (lineList.length) {
+                var line = lineList.shift();
+                var doc = new isin();
+                doc['id'] = mongoose.Types.ObjectId();
+                line.split(';').forEach(function (entry, i) {
+                    doc[schemaKeyList[i - 1]] = entry;
+                });
+                console.log(doc['code']);
+                doc.save(createDocRecurse);
+            }
+        }
+
+        createDocRecurse(null);
+    }
 
     function importFromCSV() {
         var lineList = fs.readFileSync('../data.csv').toString().split('\n');
@@ -107,21 +142,21 @@ exports.postTransactions = (req, res, next) => {
         var schemaKeyList = ['isin', 'company', 'manager', 'date', 'nature', 'instrument',
             'price', 'quantity', 'total', 'capital_share', 'currency'];
 
-        function queryAllEntries() {
-            transaction.aggregate(
-                {
-                    $group: {
-                        _id: '$RepName', oppArray: {
-                            $push: {
-                                isin: 'isin'
-                            }
-                        }
-                    }
-                }, function (err, qDocList) {
-                    console.log(util.inspect(qDocList, false, 10));
-                    process.exit(0);
-                });
-        }
+        //function queryAllEntries() {
+        //    transaction.aggregate(
+        //        {
+        //            $group: {
+        //                _id: '$RepName', oppArray: {
+        //                    $push: {
+        //                        isin: 'isin'
+        //                    }
+        //                }
+        //            }
+        //        }, function (err, qDocList) {
+        //            console.log(util.inspect(qDocList, false, 10));
+        //            process.exit(0);
+        //        });
+        //}
 
         // Recursively go through list adding documents.
         // (This will overload the stack when lots of entries
@@ -140,13 +175,18 @@ exports.postTransactions = (req, res, next) => {
                     doc[schemaKeyList[i]] = entry;
                 });
                 doc.save(createDocRecurse);
-            } else {
-                // After the last entry query to show the result.
-                //queryAllEntries();
             }
         }
 
         createDocRecurse(null);
+    }
+
+    function getCodeFromISIN(isinSource, callback) {    
+        isin.findOne({ 'isin': isinSource }, 'code', function (err, stock) {
+            if (err) return handleError(err);
+            console.log(stock.code);
+            callback(null, stock.code);
+        })
     }
 
     //AlphaVantage API Key: 974UTD95QA2DV3Y5
@@ -163,13 +203,15 @@ exports.postTransactions = (req, res, next) => {
     }
 
     // Quandl API Key: x-sv5jiML9zikPj8wjJy
-    function requestQuandlData(symbol) {
-        var quandl = "https://www.quandl.com/api/v3/datasets/EURONEXT/JXRBS?start_date=2017-09-12&end_date=2017-09-12&api_key=x-sv5jiML9zikPj8wjJy";
+    function requestQuandlData(symbol, startDate, endDate) {
+        var quandl = "https://www.quandl.com/api/v3/datasets/EURONEXT/" + symbol + "?start_date=" + startDate +
+            "&end_date=" + endDate + "&api_key=x-sv5jiML9zikPj8wjJy";
+        console.log(quandl);
         http.open("GET", quandl, true);
         http.onreadystatechange = function () {
             if (http.readyState == 4 && http.status == 200) {
                 var response = JSON.parse(http.responseText);
-                console.log(response);
+                console.log(response.dataset.data[0][4]);
             }
         }
         http.send();

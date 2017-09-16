@@ -3,17 +3,24 @@ extends layout
 block content
   .page-header
     h3 Importer des transactions
-  form.form-horizontal(id='signup-form', method='POST')
+  form.form-horizontal(id='signup-form', method='POST', action="/importTransactions")
     input(type='hidden', name='_csrf', value=_csrf)
     .form-group
       .col-sm-offset-3.col-sm-7
         button.btn.btn-success(type='submit')
           i.fa.fa-user-plus
-          | Importer
+          | Importer Transactions
+  form.form-horizontal(id='signup-form', method='POST', action="/importPrices")
+    input(type='hidden', name='_csrf', value=_csrf)
+    .form-group
+      .col-sm-offset-3.col-sm-7
+        button.btn.btn-success(type='submit')
+          i.fa.fa-user-plus
+          | Importer Prix
 
   .page-header
     h3 Liste des transactions
 
   ul
-    for transaction in transactions
-      li= transaction.isin
+    for isin in isins
+      li= isin.isin + " - " + isin.code

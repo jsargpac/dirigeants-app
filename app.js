@@ -33,6 +33,8 @@ dotenv.load({ path: '.env.example' });
 const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
 const transactionsController = require('./controllers/transactions');
+const importTransactionsController = require('./controllers/importTransactions');
+const importPricesController = require('./controllers/importPrices');
 const contactController = require('./controllers/contact');
 
 /**
@@ -133,7 +135,8 @@ app.post('/reset/:token', userController.postReset);
 app.get('/signup', userController.getSignup);
 app.post('/signup', userController.postSignup);
 app.get('/transactions', transactionsController.getTransactions);
-app.post('/transactions', transactionsController.postTransactions);
+app.post('/importTransactions', importTransactionsController.importTransactions);
+app.post('/importPrices', importPricesController.importPrices);
 app.get('/contact', contactController.getContact);
 app.post('/contact', contactController.postContact);
 app.get('/account', passportConfig.isAuthenticated, userController.getAccount);
