@@ -6,7 +6,7 @@ var fs = require('fs');
 var util = require('util');
 
 const transaction = require('../models/Transaction.js');
-const isin = require('../models/Isin.js');
+const stock = require('../models/Stock.js');
 
 /**
  * POST /transactions
@@ -16,15 +16,15 @@ exports.importPrices = (req, res, next) => {
 
     var http = new XMLHttpRequest();
 
-    getCodeFromISIN('FR0010313486', function (err, code) {
+    getCodeFromISIN('FR0011858190', function (err, code) {
         requestQuandlData(code, "2017-09-10", "2017-09-12");
     });
 
     function getCodeFromISIN(isinSource, callback) {    
-        isin.findOne({ 'isin': isinSource }, 'code', function (err, stock) {
+        stock.findOne({ 'isin': isinSource }, 'code', function (err, stockFound) {
             if (err) return handleError(err);
-            console.log(stock.code);
-            callback(null, stock.code);
+            console.log(stockFound.code);
+            callback(null, stockFound.code);
         })
     }
 

@@ -10,7 +10,7 @@ var util = require('util');
  * Liste des transactions
  */
 const transaction = require('../models/Transaction.js');
-const isin = require('../models/Isin.js');
+const isin = require('../models/Stock.js');
 
 exports.getTransactions = (req, res) => {
     //transaction.find((err, docs) => {

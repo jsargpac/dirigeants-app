@@ -6,7 +6,7 @@ var fs = require('fs');
 var util = require('util');
 
 const transaction = require('../models/Transaction.js');
-const isin = require('../models/Isin.js');
+const stock = require('../models/Stock.js');
 
 /**
  * POST /transactions
@@ -15,8 +15,11 @@ const isin = require('../models/Isin.js');
 exports.importTransactions = (req, res, next) => {
 
     var http = new XMLHttpRequest();
+    
+    //importISIN();
+    //importFromCSV();
 
-    function importISIN() {
+    function importISIN(callback) {
         var lineList = fs.readFileSync('../Euronext_Equities_EU.csv').toString().split('\n');
         lineList.shift();
 
@@ -29,7 +32,7 @@ exports.importTransactions = (req, res, next) => {
             }
             if (lineList.length) {
                 var line = lineList.shift();
-                var doc = new isin();
+                var doc = new stock();
                 doc['id'] = mongoose.Types.ObjectId();
                 line.split(';').forEach(function (entry, i) {
                     doc[schemaKeyList[i - 1]] = entry;
@@ -37,6 +40,7 @@ exports.importTransactions = (req, res, next) => {
                 console.log(doc['code']);
                 doc.save(createDocRecurse);
             }
+            //callback(null);
         }
 
         createDocRecurse(null);
@@ -44,26 +48,10 @@ exports.importTransactions = (req, res, next) => {
 
     function importFromCSV() {
         var lineList = fs.readFileSync('../data.csv').toString().split('\n');
-        lineList.shift(); // Shift the headings off the list of records.
+        lineList.shift();
 
         var schemaKeyList = ['isin', 'company', 'manager', 'date', 'nature', 'instrument',
             'price', 'quantity', 'total', 'capital_share', 'currency'];
-
-        //function queryAllEntries() {
-        //    transaction.aggregate(
-        //        {
-        //            $group: {
-        //                _id: '$RepName', oppArray: {
-        //                    $push: {
-        //                        isin: 'isin'
-        //                    }
-        //                }
-        //            }
-        //        }, function (err, qDocList) {
-        //            console.log(util.inspect(qDocList, false, 10));
-        //            process.exit(0);
-        //        });
-        //}
 
         // Recursively go through list adding documents.
         // (This will overload the stack when lots of entries
@@ -81,11 +69,34 @@ exports.importTransactions = (req, res, next) => {
                 line.split(';').forEach(function (entry, i) {
                     doc[schemaKeyList[i]] = entry;
                 });
+                if (doc.instrument.includes('Action')) {
+                    if (doc.nature.includes('Cession')) {
+                        updateStock(doc.isin, doc.total, false);
+                    } else if (doc.nature.includes('Acquisition')) {
+                        updateStock(doc.isin, doc.total, true);
+                    }
+                }
                 doc.save(createDocRecurse);
             }
         }
 
         createDocRecurse(null);
+    }
+    
+    function updateStock(isinSource, total, isBought) {
+        stock.findOne({ 'isin': isinSource }, function (err, stockFound) {
+            if (err) return handleError(err);
+            if (stockFound != null) {
+                console.log("Mouvement : " + stockFound.code);
+                if (isBought) {
+                    stockFound.total_bought = stockFound.total_bought + total;
+                } else {
+                    console.log(stockFound.total_sold);
+                    stockFound.total_sold = stockFound.total_sold + total;
+                }
+                stockFound.save();
+            }
+        })
     }
 
 };
