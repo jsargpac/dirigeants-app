@@ -9,10 +9,10 @@ const transaction = require('../models/Transaction.js');
 const stock = require('../models/Stock.js');
 
 /**
- * POST /prices
- * Import prices
+ * POST /transactions
+ * Create a new transaction
  */
-exports.importPrices = (req, res, next) => {
+exports.simpleTest = (req, res, next) => {
 
     var http = new XMLHttpRequest();
 

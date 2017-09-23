@@ -4,7 +4,7 @@ const stockSchema = new mongoose.Schema({
     id: { type: String, unique: true },
     isin: String,
     code: String,
-    close: [[Date], [Number]],
+    close: [[String, String]],
     total_bought: { type: Number, default: 0 },
     total_sold: { type: Number, default: 0 }
 });
