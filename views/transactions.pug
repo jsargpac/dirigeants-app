@@ -18,6 +18,14 @@ block content
           i.fa.fa-user-plus
           | Importer Prix
 
+  form.form-horizontal(id='signup-form', method='POST', action="/simpleTest")
+    input(type='hidden', name='_csrf', value=_csrf)
+    .form-group
+      .col-sm-offset-3.col-sm-7
+        button.btn.btn-success(type='submit')
+          i.fa.fa-user-plus
+          | Test Simple
+
   .page-header
     h3 Liste des transactions
 

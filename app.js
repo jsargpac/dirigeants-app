@@ -138,7 +138,7 @@ app.post('/signup', userController.postSignup);
 app.get('/transactions', transactionsController.getTransactions);
 app.post('/importTransactions', importTransactionsController.importTransactions);
 app.post('/importPrices', importPricesController.importPrices);
-app.post('/testData', testDataController.simpleTest);
+app.post('/simpleTest', testDataController.simpleTest);
 app.get('/contact', contactController.getContact);
 app.post('/contact', contactController.postContact);
 app.get('/account', passportConfig.isAuthenticated, userController.getAccount);
