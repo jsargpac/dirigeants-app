@@ -34,21 +34,40 @@ exports.simpleTest = (req, res, next) => {
         deltas.push(temp);
     }
 
-    stockMongoose.findOne({ 'code': codeSource }, function (err, stock) {
-        transactionMongoose.find({ 'isin': isinSource, 'nature': 'Acquisition' }, function (err, transactions) {
-            async.each(transactions, function (transaction, callback) {
+    var nTransactions = 0;
+    var nFailures = 0;
+
+    transactionMongoose.find({ 'nature': 'Acquisition' }, function (err, transactions) {
+        var trs = transactions.slice(300, transactions.length);
+        nTransactions = trs.length;
+        async.each(trs, function (transaction, callback) {
+            stockMongoose.findOne({ 'isin': transaction.isin }, function (err, stock) {
                 testTransaction(transaction, stock);
                 callback(null);
-            }, logDeltas);
-        });
+            });
+        }, logDeltas);
     });
 
+    // stockMongoose.findOne({ 'code': codeSource }, function (err, stock) {
+    //     transactionMongoose.find({ 'isin': isinSource, 'nature': 'Acquisition' }, function (err, transactions) {
+    //         async.each(transactions, function (transaction, callback) {
+    //             testTransaction(transaction, stock);
+    //             callback(null);
+    //         }, logDeltas);
+    //     });
+    // });
+
     function testTransaction(transaction, stock) {
-        console.log(transaction.date);
+        if (stock == null) return;
+        console.log(stock.code + " - " + transaction.date);
         var dateToFind = transaction.date;
         var dates = stock.close.map(function (value, index) { return value[0]; });
         var closes = stock.close.map(function (value, index) { return value[1]; });
         var len = dates.length;
+        if (len == 0) {
+            console.log("Pas de donnees pour : " + stock.code);
+            nFailures++;
+        }
         for (s = startStart; s < startEnd; s++) {
             for (e = endStart; e < endEnd; e++) {
                 if (e > s) {
@@ -91,6 +110,10 @@ exports.simpleTest = (req, res, next) => {
                 }
             }
         }
+        var nTFinal = nTransactions-nFailures;
+        min = min / nTFinal;
+        max = max / nTFinal;
+        console.log("Transactions: " + nTFinal);
         console.log("min: " + min.toPrecision(2) + " ( " + sMin + " - " + eMin + " )");
         console.log("max: " + max.toPrecision(2) + " ( " + sMax + " - " + eMax + " )");
     }
